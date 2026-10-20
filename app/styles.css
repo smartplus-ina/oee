@@ -1,0 +1,403 @@
+/* ───────────────────────────────────────────────────────────────
+   Smart OEE — design tokens
+   Dark, industrial, slate-black surface with electric-blue accent.
+   ─────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Surface — deep, slightly cool. */
+  --bg:            #0a0d12;
+  --bg-elev-0:     #0e131b;
+  --bg-elev-1:     #11161f;
+  --bg-elev-2:     #161c28;
+  --bg-elev-3:     #1c2433;
+
+  /* Borders / dividers. */
+  --line:          #1d2735;
+  --line-strong:   #2a3548;
+  --line-glow:     color-mix(in oklab, var(--accent) 35%, transparent);
+
+  /* Text. */
+  --fg:            #e6ecf5;
+  --fg-muted:      #8a95aa;
+  --fg-dim:        #5a6478;
+  --fg-faint:      #404a5c;
+
+  /* Accent (overridden by tweak). */
+  --accent:        #2b6cff;
+  --accent-soft:   color-mix(in oklab, var(--accent) 16%, transparent);
+  --accent-faint:  color-mix(in oklab, var(--accent) 8%, transparent);
+  --accent-ink:    #ffffff;
+
+  /* Semantic status (independent of accent). */
+  --ok:            #34d399;
+  --warn:          #f59e0b;
+  --crit:          #f43f5e;
+  --info:          #38bdf8;
+  --idle:          #6b7689;
+
+  /* Geometry. */
+  --r-sm:          4px;
+  --r-md:          6px;
+  --r-lg:          10px;
+  --r-xl:          14px;
+
+  /* Shadows. */
+  --shadow-card:   0 1px 0 rgba(255,255,255,0.02) inset, 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-pop:    0 24px 60px -20px rgba(0,0,0,0.7), 0 8px 24px -12px rgba(0,0,0,0.5);
+  --shadow-glow:   0 0 0 1px var(--line-glow), 0 8px 32px -8px color-mix(in oklab, var(--accent) 40%, transparent);
+
+  /* Layout. */
+  --sidebar-w:     232px;
+  --topbar-h:      56px;
+  --drawer-w:      440px;
+
+  /* Type. */
+  --f-sans:        'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --f-mono:        'IBM Plex Mono', ui-monospace, 'JetBrains Mono', monospace;
+}
+
+/* ───────── Reset & base ───────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-sans);
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+input, select { font: inherit; color: inherit; }
+
+/* Subtle grid texture on body to feel SCADA-y, very low contrast. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 32px 32px;
+  z-index: 0;
+}
+
+/* ───────── App shell ───────── */
+
+.app {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: var(--topbar-h) 1fr;
+  grid-template-areas:
+    "side top"
+    "side main";
+  z-index: 1;
+}
+
+.app__side { grid-area: side; border-right: 1px solid var(--line); background: var(--bg-elev-0); display: flex; flex-direction: column; min-height: 0; }
+.app__top  { grid-area: top;  border-bottom: 1px solid var(--line); background: color-mix(in oklab, var(--bg-elev-0) 80%, transparent); backdrop-filter: blur(10px); display: flex; align-items: center; gap: 16px; padding: 0 20px; z-index: 5; }
+.app__main { grid-area: main; overflow: auto; padding: 20px 24px 40px; }
+
+/* ───────── Sidebar ───────── */
+
+.brand { display: flex; align-items: center; gap: 10px; padding: 16px 18px 14px; border-bottom: 1px solid var(--line); }
+.brand__mark {
+  width: 26px; height: 26px; border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 40%, #000));
+  display: grid; place-items: center;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 50%, transparent), 0 6px 18px -6px color-mix(in oklab, var(--accent) 55%, transparent);
+  position: relative;
+}
+.brand__mark::after {
+  content: ""; position: absolute; inset: 4px; border-radius: 3px;
+  border: 1.5px solid rgba(255,255,255,0.85);
+  border-right-color: transparent; border-bottom-color: transparent;
+  transform: rotate(-45deg);
+}
+.brand__name { font-weight: 600; letter-spacing: -0.01em; font-size: 14px; }
+.brand__sub  { display: block; font-family: var(--f-mono); font-size: 9.5px; color: var(--fg-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 1px; }
+
+.nav { padding: 12px 10px; display: flex; flex-direction: column; gap: 1px; flex: 1; min-height: 0; overflow: auto; }
+.nav__group { font-family: var(--f-mono); font-size: 9.5px; color: var(--fg-dim); letter-spacing: 0.16em; text-transform: uppercase; padding: 14px 10px 6px; }
+.nav__item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--r-md);
+  color: var(--fg-muted); font-size: 13px;
+  cursor: pointer; transition: background .15s, color .15s;
+  position: relative;
+}
+.nav__item:hover { background: var(--bg-elev-1); color: var(--fg); }
+.nav__item--active {
+  background: var(--accent-faint); color: var(--fg);
+  box-shadow: inset 0 0 0 1px var(--line-glow);
+}
+.nav__item--active::before {
+  content: ""; position: absolute; left: -10px; top: 8px; bottom: 8px;
+  width: 2px; border-radius: 2px; background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.nav__icon { width: 16px; height: 16px; flex: 0 0 16px; color: currentColor; }
+.nav__badge { margin-left: auto; font-family: var(--f-mono); font-size: 10px; padding: 1px 6px; border-radius: 999px; background: var(--bg-elev-2); color: var(--fg-muted); }
+.nav__badge--crit { background: color-mix(in oklab, var(--crit) 18%, transparent); color: var(--crit); }
+
+.side__foot {
+  border-top: 1px solid var(--line);
+  padding: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--bg-elev-2); border: 1px solid var(--line-strong); display: grid; place-items: center; font-family: var(--f-mono); font-size: 11px; color: var(--fg); }
+.side__user { display: flex; flex-direction: column; min-width: 0; }
+.side__user b { font-size: 12.5px; font-weight: 500; }
+.side__user span { font-size: 10.5px; color: var(--fg-dim); font-family: var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* ───────── Topbar ───────── */
+
+.crumbs { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--fg-muted); }
+.crumbs b { color: var(--fg); font-weight: 500; }
+.crumbs__sep { color: var(--fg-faint); }
+.crumbs__page { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-dim); }
+
+.live {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 8px 4px 6px; border-radius: 999px;
+  background: var(--bg-elev-1); border: 1px solid var(--line);
+  font-family: var(--f-mono); font-size: 10.5px; color: var(--fg-muted);
+  letter-spacing: 0.06em;
+}
+.live__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px color-mix(in oklab, var(--ok) 18%, transparent); animation: pulse 2.2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+
+.top__spacer { flex: 1; }
+
+.top__search {
+  display: flex; align-items: center; gap: 8px;
+  height: 32px; padding: 0 10px; min-width: 260px;
+  background: var(--bg-elev-1); border: 1px solid var(--line); border-radius: var(--r-md);
+  color: var(--fg-muted); font-size: 12.5px;
+}
+.top__search:focus-within { border-color: var(--line-strong); }
+.top__search input { background: none; border: 0; outline: 0; width: 100%; color: var(--fg); }
+.top__search input::placeholder { color: var(--fg-dim); }
+.top__search kbd { font-family: var(--f-mono); font-size: 10px; padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); color: var(--fg-dim); }
+
+.icon-btn {
+  width: 32px; height: 32px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--bg-elev-1);
+  color: var(--fg-muted);
+  display: grid; place-items: center; position: relative;
+}
+.icon-btn:hover { color: var(--fg); border-color: var(--line-strong); }
+.icon-btn .dot { position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--crit); box-shadow: 0 0 0 2px var(--bg-elev-1); }
+
+/* Primary button — used for AI triggers. */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 32px; padding: 0 12px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--bg-elev-1); color: var(--fg);
+  font-size: 12.5px; white-space: nowrap;
+}
+.btn:hover { border-color: var(--line-strong); background: var(--bg-elev-2); }
+.btn--primary {
+  border-color: color-mix(in oklab, var(--accent) 50%, transparent);
+  background: color-mix(in oklab, var(--accent) 14%, var(--bg-elev-1));
+  color: var(--fg);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent) 22%, transparent) inset,
+              0 8px 24px -10px color-mix(in oklab, var(--accent) 55%, transparent);
+}
+.btn--primary:hover { background: color-mix(in oklab, var(--accent) 22%, var(--bg-elev-1)); }
+.btn--ghost { background: transparent; }
+.btn--sm    { height: 26px; padding: 0 9px; font-size: 11.5px; border-radius: var(--r-sm); }
+.btn .ai-spark { width: 13px; height: 13px; color: var(--accent); }
+
+/* ───────── Cards ───────── */
+
+.card {
+  background: var(--bg-elev-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  display: flex; flex-direction: column;
+  min-width: 0;
+}
+.card__head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.card__title { font-size: 11px; font-family: var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-muted); }
+.card__sub   { font-size: 11px; color: var(--fg-dim); margin-left: auto; font-family: var(--f-mono); letter-spacing: 0.04em; }
+.card__body  { padding: 14px; flex: 1; min-width: 0; }
+.card__foot  { padding: 10px 14px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 10px; font-size: 11.5px; color: var(--fg-muted); }
+
+.card--ai {
+  background:
+    radial-gradient(120% 100% at 0% 0%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 60%),
+    var(--bg-elev-1);
+  border-color: color-mix(in oklab, var(--accent) 30%, var(--line));
+}
+
+/* KPI cell variant. */
+.kpi { padding: 14px 16px 14px; display: flex; flex-direction: column; gap: 4px; }
+.kpi__label { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-dim); }
+.kpi__row { display: flex; align-items: baseline; gap: 8px; }
+.kpi__value { font-family: var(--f-mono); font-size: 28px; font-weight: 500; letter-spacing: -0.02em; color: var(--fg); font-variant-numeric: tabular-nums; }
+.kpi__unit  { color: var(--fg-dim); font-family: var(--f-mono); font-size: 12px; }
+.kpi__delta { margin-left: auto; font-family: var(--f-mono); font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+.kpi__delta--up   { color: var(--ok);   background: color-mix(in oklab, var(--ok) 12%, transparent); }
+.kpi__delta--down { color: var(--crit); background: color-mix(in oklab, var(--crit) 14%, transparent); }
+.kpi__bar { height: 4px; border-radius: 2px; background: var(--bg-elev-3); overflow: hidden; margin-top: 8px; }
+.kpi__bar > i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+
+/* ───────── Status chips & dots ───────── */
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px;
+  background: var(--bg-elev-2); color: var(--fg-muted);
+  border: 1px solid var(--line);
+}
+.chip--ok   { color: var(--ok);   background: color-mix(in oklab, var(--ok)   12%, transparent); border-color: color-mix(in oklab, var(--ok)   28%, transparent); }
+.chip--warn { color: var(--warn); background: color-mix(in oklab, var(--warn) 12%, transparent); border-color: color-mix(in oklab, var(--warn) 28%, transparent); }
+.chip--crit { color: var(--crit); background: color-mix(in oklab, var(--crit) 14%, transparent); border-color: color-mix(in oklab, var(--crit) 30%, transparent); }
+.chip--idle { color: var(--idle); background: color-mix(in oklab, var(--idle) 10%, transparent); border-color: color-mix(in oklab, var(--idle) 22%, transparent); }
+.chip--info { color: var(--info); background: color-mix(in oklab, var(--info) 12%, transparent); border-color: color-mix(in oklab, var(--info) 28%, transparent); }
+
+.dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.dot--ok   { background: var(--ok);   box-shadow: 0 0 6px var(--ok); }
+.dot--warn { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+.dot--crit { background: var(--crit); box-shadow: 0 0 8px var(--crit); animation: pulse 1.2s ease-in-out infinite; }
+.dot--idle { background: var(--idle); }
+
+/* ───────── Section headers ───────── */
+
+.section { display: flex; align-items: center; gap: 12px; margin: 4px 0 14px; }
+.section h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.005em; }
+.section__sub { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-dim); }
+.section__rule { flex: 1; height: 1px; background: linear-gradient(to right, var(--line), transparent); }
+
+.page__head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 24px; margin-bottom: 16px;
+}
+.page__title { font-size: 22px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+.page__meta  { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-dim); margin-top: 4px; }
+.page__actions { display: flex; align-items: center; gap: 8px; }
+
+/* ───────── Tables ───────── */
+
+.table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.table th, .table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); }
+.table th { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-dim); font-weight: 500; background: var(--bg-elev-0); position: sticky; top: 0; }
+.table td { color: var(--fg); }
+.table td.mono, .table td .mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.table tr:hover td { background: color-mix(in oklab, var(--bg-elev-2) 50%, transparent); }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.fg-muted { color: var(--fg-muted); }
+.fg-dim   { color: var(--fg-dim); }
+
+/* ───────── Filters / segmented ───────── */
+
+.seg {
+  display: inline-flex; padding: 2px; background: var(--bg-elev-1);
+  border: 1px solid var(--line); border-radius: var(--r-md);
+}
+.seg button {
+  padding: 4px 10px; font-size: 11.5px; color: var(--fg-muted);
+  border-radius: 4px;
+  font-family: var(--f-mono); letter-spacing: 0.06em;
+}
+.seg button[aria-selected="true"] { background: var(--bg-elev-3); color: var(--fg); box-shadow: inset 0 0 0 1px var(--line-strong); }
+
+.field {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 30px; padding: 0 10px;
+  background: var(--bg-elev-1); border: 1px solid var(--line); border-radius: var(--r-md);
+  font-size: 12px; color: var(--fg-muted);
+}
+.field b { color: var(--fg); font-weight: 500; }
+.field svg { color: var(--fg-dim); }
+
+/* ───────── AI Drawer ───────── */
+
+.drawer__scrim {
+  position: fixed; inset: 0; background: rgba(4,7,12,0.5);
+  backdrop-filter: blur(2px);
+  z-index: 60;
+  animation: fade .18s ease-out;
+}
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: var(--drawer-w); max-width: 92vw;
+  background: var(--bg-elev-1);
+  border-left: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-pop);
+  z-index: 61;
+  display: flex; flex-direction: column;
+  animation: slidein .25s cubic-bezier(.2,.7,.2,1);
+}
+@keyframes slidein { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.drawer__head { padding: 14px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
+.drawer__title { font-size: 13px; font-weight: 600; }
+.drawer__sub   { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-dim); }
+.drawer__body  { flex: 1; overflow: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.drawer__foot  { padding: 12px 16px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
+
+.ai-banner {
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--line));
+  background:
+    radial-gradient(120% 80% at 0% 0%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 60%),
+    var(--bg-elev-1);
+  border-radius: var(--r-lg);
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+/* ───────── Spark / chart support ───────── */
+
+.spark { width: 100%; height: 36px; display: block; }
+
+.legend { display: flex; gap: 12px; font-size: 11px; color: var(--fg-muted); font-family: var(--f-mono); letter-spacing: 0.04em; }
+.legend i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 6px; vertical-align: middle; }
+
+/* ───────── Misc ───────── */
+
+.scroll-y { overflow-y: auto; }
+.hairline { height: 1px; background: var(--line); }
+.grow { flex: 1; }
+.muted-mono { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-dim); }
+
+/* Hide native scrollbars but keep functionality (subtle for SCADA look). */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--bg-elev-2); border-radius: 6px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--bg-elev-3); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Variant: classic SCADA tightens corners, removes glows, denser type. */
+.app[data-variant="scada"] {
+  --r-sm: 2px;
+  --r-md: 3px;
+  --r-lg: 4px;
+  --r-xl: 6px;
+}
+.app[data-variant="scada"] .card { background: var(--bg-elev-0); }
+.app[data-variant="scada"] .card__head { padding: 10px 12px 8px; }
+.app[data-variant="scada"] .card__body { padding: 12px; }
+.app[data-variant="scada"] .kpi__value { font-family: var(--f-mono); font-weight: 500; }
+.app[data-variant="scada"] body, .app[data-variant="scada"] { font-family: var(--f-mono); }
+.app[data-variant="scada"] .page__title { font-family: var(--f-mono); font-weight: 500; letter-spacing: 0.02em; }
+.app[data-variant="scada"] .section h2  { font-family: var(--f-mono); font-weight: 500; letter-spacing: 0.04em; }
+.app[data-variant="scada"] .brand__name { font-family: var(--f-mono); letter-spacing: 0.04em; }
+.app[data-variant="scada"] .nav__item { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.04em; }

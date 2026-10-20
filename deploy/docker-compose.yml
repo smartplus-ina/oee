@@ -1,0 +1,19 @@
+services:
+  smart-oee:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: smart-oee
+    restart: unless-stopped
+    networks: [oee]
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: smart-oee-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    depends_on: [smart-oee]
+    networks: [oee]
+networks:
+  oee: {}
