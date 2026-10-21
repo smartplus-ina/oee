@@ -72,6 +72,7 @@ const PM_AISLE = { background: 'repeating-linear-gradient(to bottom, color-mix(i
 function PlantMap({ tweak, onOpenAI }) {
   const D = window.MasahiroData; const I = window.Icon;
   const [layer, setLayer] = useState('status');
+  const [view, setView] = useState('2d');
   const [line, setLine] = useState('all');
   const [shift, setShift] = useState('A');
   const [sel, setSel] = useState('IMM-04');
@@ -115,12 +116,15 @@ function PlantMap({ tweak, onOpenAI }) {
           <div className="card__head">
             <span className="card__title">Floor plan</span>
             <div className="seg" style={{ marginLeft: 12 }}>
+              {[['2d', 'Plan'], ['3d', '3D']].map(([k, l]) => <button key={k} aria-selected={view === k} onClick={() => setView(k)}>{l}</button>)}
+            </div>
+            <div className="seg" style={{ marginLeft: 8 }}>
               {[['status', 'Status'], ['oee', 'OEE'], ['alarm', 'Alarm'], ['temp', 'Mold temp']].map(([k, l]) => <button key={k} aria-selected={layer === k} onClick={() => setLayer(k)}>{l}</button>)}
             </div>
             <div style={{ flex: 1 }}></div>
             <div className="legend">{legend.map(([t, l]) => <span key={l}><i style={{ background: `var(--${t === 'info' ? 'info' : t})` }}></i>{l}</span>)}</div>
           </div>
-          <div className="card__body" style={{ display: 'grid', gridTemplateColumns: '150px 14px minmax(0,1fr) 14px 130px', gap: 8, minHeight: 520 }}>
+          {view === '3d' ? <div className="card__body"><window.Plant3D machines={D.MACHINES} lines={PM_LINES} line={line} selected={sel} onSelect={setSel} tones={Object.fromEntries(D.MACHINES.map((x) => [x.id, pmTone(x, layer, D.ALARMS, shift)]))} /></div> : <div className="card__body" style={{ display: 'grid', gridTemplateColumns: '150px 14px minmax(0,1fr) 14px 130px', gap: 8, minHeight: 520 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <PMZone title="Material warehouse" sub="Resin · 3 silos" style={{ flex: 1 }}><div className="mono" style={{ fontSize: 11, color: 'var(--warn)', marginTop: 'auto' }}>IMM-02 hopper 24%</div></PMZone>
               <PMZone title="Mold room" sub="42 molds · 2 in service" style={{ flex: 1 }} />
@@ -146,7 +150,7 @@ function PlantMap({ tweak, onOpenAI }) {
               <PMZone title="QC area" sub="Inspection · 2 stations" style={{ flex: 1 }} />
               <PMZone title="Shipping" sub="Dock 1–2" style={{ flex: 1 }} />
             </div>
-          </div>
+          </div>}
           <div className="card__foot"><span style={{ width: 14, borderTop: '2px dashed color-mix(in oklab, var(--warn) 50%, transparent)' }}></span><span className="muted-mono">Forklift aisle</span><span className="muted-mono" style={{ marginLeft: 'auto' }}>Click a press for details</span></div>
         </section>
 

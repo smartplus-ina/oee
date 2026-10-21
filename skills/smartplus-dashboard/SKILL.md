@@ -7,6 +7,32 @@ description: Use when building any web-based dashboard, monitoring, admin, or an
 
 Design system and build recipe distilled from the Smart OEE prototype. Reference spec: `Smart OEE Design Spec.md`. Reference implementation: `Masahiro OEE.html` + `app/`.
 
+## Reference files (copy, then replace the domain)
+`reference/` holds the working Smart OEE look: `index.html` (script load order), `styles.css` (all tokens + components), `chrome.jsx` (sidebar, topbar, Tweaks, AI drawer), `dashboard.jsx` (hero + KPI + charts + machine grid), `main.jsx` (router), `deploy/` (nginx + Docker), and the full spec. Start new dashboards by copying these, then change data, labels, and pages. Keep tokens and component classes unchanged.
+
+## Look at a glance
+- Shell: sidebar 232px, topbar 56px, drawer 440px, content on a 12-column grid with 12px gap.
+- Surfaces: `--bg #0a0d12`, elevations `#0e131b #11161f #161c28 #1c2433`, lines `#1d2735 / #2a3548`.
+- Text: `--fg #e6ecf5`, muted `#8a95aa`, dim `#5a6478`, faint `#404a5c`.
+- Accent `#2b6cff` (one only, switchable in Tweaks). Status: ok `#34d399`, warn `#f59e0b`, crit `#f43f5e`, info `#38bdf8`, idle `#6b7689`.
+- Radius 4/6/10/14px; SCADA variant 2/3/4/6px. Card shadow is a 1px inset highlight plus a faint drop.
+- Type: IBM Plex Sans + IBM Plex Mono (numbers, labels, table headers, IDs).
+- Navigation order: Dashboard, Records, Analytics, Alarms, Reports, Schedule, Plant Map, Settings (10 tabs: General, Machines, OEE Targets, Shifts, Downtime Codes, Alarms, Data Sources, AI Insight, Users, Appearance).
+- Tweaks: variant (modern/scada), accent, OEE hero style, chart type, AI pattern (drawer/banner/card).
+
+## 3D view (three.js)
+Use for floor plans, asset layouts, or any spatial status view. Reference: `reference/plant3d.jsx` (component `Plant3D`), wired in `reference/plantmap.jsx` via a `Plan | 3D` segmented toggle in the card head.
+- Load order in `index.html`: `three@0.128.0/build/three.min.js` then `examples/js/controls/OrbitControls.js` (globals, no modules), both before `plant3d.jsx`.
+- Props: `machines`, `lines`, `tones` (`{id: ok|warn|crit|info|idle}` from the same tone function the 2D tiles use), `selected`, `line` (filter), `onSelect`. Selection state is shared with the 2D view and the detail panel.
+- Scene recipe: dark floor + grid from tokens (`--bg-elev-0`, `--line`), one lane strip per line, mono sprite labels, soft ambient + key light + accent rim light. Read colors from CSS variables at mount so Tweaks (accent) apply.
+- Status: skin and beacon take the tone color; crit beacon pulses, warn pulses slowly; selected shows an accent ring and lifts slightly; other lines dim to 18% opacity.
+- Interaction: OrbitControls with damping, polar angle capped above the floor, min/max distance; click vs drag is separated by a 4px threshold; Raycaster picks meshes tagged with `userData.id`.
+- Rules: same semantic colors as 2D, no decorative motion beyond the beacon pulse, hint text in mono at bottom-left, container fixed height (~540px) and resized with `ResizeObserver`. Always dispose geometries, materials, renderer, and listeners on unmount.
+- Replace the primitive machine (box, cylinder, cone) with a GLB model when real assets exist.
+
+## Deploy recipe (static site)
+nginx container published on `127.0.0.1:<port>:80` only; Cloudflare Tunnel on the host routes the hostname to `http://localhost:<port>`. The port in `docker-compose.yml` and the tunnel's Service must match. Do not commit tunnel tokens. Update: `git pull && docker compose up -d --build`.
+
 ## When to apply
 Any new web app that is data-heavy, operational, and used at a glance: monitoring, analytics, alarms, reports, schedules, settings. Keep the system; replace the domain (machines, metrics, copy).
 
